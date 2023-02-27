@@ -4,12 +4,19 @@ from werkzeug.exceptions import BadRequest
 from blog.views.users import users_app
 from blog.views.articles import articles_app
 from blog.models.database import db
+from blog.views.auth import login_manager, auth_app
 
 app = Flask(__name__)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/blog.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = "abcdefg123456"
 db.init_app(app)
+
+# для работы авторизации нам обязательно нужен SECRET_KEY в конфигурации, добавляем
+
+app.register_blueprint(auth_app, url_prefix="/auth")
+login_manager.init_app(app)
 
 @app.cli.command("init-db")
 def init_db():
@@ -31,7 +38,7 @@ def create_users():
     from blog.models import User
     admin = User(username="admin", is_staff=True)
     james = User(username="james")
-    
+
     db.session.add(admin)
     db.session.add(james)
     db.session.commit()
@@ -75,7 +82,6 @@ def custom_status_code():
         return "code from json", request.json["code"]
 
     return "", 204
-
 
 @app.before_request
 def process_before_request():
