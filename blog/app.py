@@ -1,4 +1,6 @@
 from flask import Flask, request, g, render_template
+from flask_migrate import Migrate
+import os
 from time import time
 from werkzeug.exceptions import BadRequest
 from blog.views.users import users_app
@@ -8,6 +10,11 @@ from blog.views.auth import login_manager, auth_app
 
 app = Flask(__name__)
 
+migrate = Migrate(app, db, compare_type=True)
+
+
+cfg_name = os.environ.get("CONFIG_NAME") or 'ProductionConfig'
+app.config.from_object(f"blog.configs.{cfg_name}")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/blog.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = "abcdefg123456"
