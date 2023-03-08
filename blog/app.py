@@ -1,14 +1,25 @@
-from flask import Flask, request, g, render_template
+from flask import Flask, request, g, render_template, Blueprint, redirect, url_for, current_app
 from flask_migrate import Migrate
-import os
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+
 from time import time
 from werkzeug.exceptions import BadRequest
+from sqlalchemy.exc import IntegrityError
+
+
 from blog.views.users import users_app
 from blog.views.articles import articles_app
 from blog.models.database import db
 from blog.views.auth import login_manager, auth_app
+from blog.security import flask_bcrypt
+from blog.models import User
+from blog.forms.user import RegistrationForm
+
+import os
 
 app = Flask(__name__)
+
+flask_bcrypt.init_app(app)
 
 migrate = Migrate(app, db, compare_type=True)
 
@@ -25,34 +36,27 @@ db.init_app(app)
 app.register_blueprint(auth_app, url_prefix="/auth")
 login_manager.init_app(app)
 
-@app.cli.command("init-db")
-def init_db():
+
+@app.cli.command("create-admin")
+def create_admin():
     """
     Run in your terminal:
-    flask init-db
+    ➜ flask create-admin
+    > created admin: <User #1 'admin'>
     """
-    db.create_all()
-    print("done!")
 
-
-@app.cli.command("create-users")
-def create_users():
-    """
-    Run in your terminal:
-    flask create-users
-    > done! created users: <User #1 'admin'> <User #2 'james'>
-    """
     from blog.models import User
-    admin = User(username="admin", is_staff=True)
-    james = User(username="james")
 
+    admin = User(username="admin", is_staff=True)
+    admin.password = os.environ.get("ADMIN_PASSWORD") or "adminpass"
     db.session.add(admin)
-    db.session.add(james)
     db.session.commit()
-    print("done! created users:", admin, james)
+    print("created admin:", admin)
+
 
 app.register_blueprint(users_app, url_prefix="/users")
 app.register_blueprint(articles_app, url_prefix="/articles")
+
 
 @app.route("/")
 def index():
@@ -130,6 +134,6 @@ def do_zero_division():
 
 @app.errorhandler(ZeroDivisionError)
 def handle_zero_division_error(error):
-    print(error) # prints str version of error: 'division by zero'
+    print(error)  # prints str version of error: 'division by zero'
     app.logger.exception("Here's traceback for zero division error")
     return "Never divide by zero!", 400
