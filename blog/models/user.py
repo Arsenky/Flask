@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, LargeBinary
 from blog.models.database import db
 from flask_login import UserMixin
 from blog.security import flask_bcrypt
-
+from sqlalchemy.orm import relationship
 
 
 class User(db.Model, UserMixin):
@@ -29,3 +29,6 @@ class User(db.Model, UserMixin):
 
     def validate_password(self, password) -> bool:
         return flask_bcrypt.check_password_hash(self._password, password)
+
+    author = relationship("Author", uselist=False, back_populates="user")
+
