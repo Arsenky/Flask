@@ -10,6 +10,7 @@
             <a href="{{ url_for('articles_app.details', article_id=article.id) }}">{{
                 article.title }}</a>
             by {{ article.author.user.username }}
+            <div>Created at {{ article.dt_created }}</div>
         </li>
         {% endfor %}
     </ul>
