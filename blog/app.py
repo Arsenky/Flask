@@ -1,6 +1,7 @@
 from flask import Flask, request, g, render_template, Blueprint, redirect, url_for, current_app
 from flask_migrate import Migrate
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_sqlalchemy import SQLAlchemy, query
 
 from time import time
 from werkzeug.exceptions import BadRequest
@@ -14,6 +15,8 @@ from blog.views.auth import login_manager, auth_app
 from blog.security import flask_bcrypt
 from blog.models import User
 from blog.forms.user import RegistrationForm
+from blog.views.authors import authors_app
+
 
 import os
 
@@ -34,6 +37,8 @@ db.init_app(app)
 # для работы авторизации нам обязательно нужен SECRET_KEY в конфигурации, добавляем
 
 app.register_blueprint(auth_app, url_prefix="/auth")
+app.register_blueprint(authors_app, url_prefix="/authors")
+
 login_manager.init_app(app)
 
 
@@ -53,6 +58,14 @@ def create_admin():
     db.session.commit()
     print("created admin:", admin)
 
+@app.cli.command("del-art")
+def create_admin():
+    from blog.models import Article
+    articles = Article.query.all()
+    print(articles[0])
+    db.session.delete(articles[0])
+    db.session.commit()
+    print("done!")
 
 app.register_blueprint(users_app, url_prefix="/users")
 app.register_blueprint(articles_app, url_prefix="/articles")
