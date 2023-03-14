@@ -22,3 +22,6 @@ class Article(db.Model):
 
     def __repr__(self):
         return f"<Article #{self.id}, {self.author}, {self.author_id}, {self.title}>"
+
+    def __str__(self):
+        return self.title

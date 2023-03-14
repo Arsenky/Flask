@@ -16,7 +16,7 @@ from blog.security import flask_bcrypt
 from blog.models import User
 from blog.forms.user import RegistrationForm
 from blog.views.authors import authors_app
-
+from blog.admin import admin
 
 import os
 
@@ -25,6 +25,9 @@ app = Flask(__name__)
 flask_bcrypt.init_app(app)
 
 migrate = Migrate(app, db, compare_type=True)
+
+admin.init_app(app)
+
 
 
 cfg_name = os.environ.get("CONFIG_NAME") or 'ProductionConfig'
