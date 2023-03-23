@@ -33,6 +33,12 @@ class UserAdminView(CustomView):
     can_edit = True
     can_delete = False
 
+class AuthorAdminView(CustomView):
+    can_export = True
+    export_types = ["csv", "xlsx"]
+    create_modal = True
+    edit_modal = True
+
 # Create admin with custom base template
 admin = Admin(name="Blog Admin", template_mode="bootstrap4")
 
@@ -40,6 +46,7 @@ admin = Admin(name="Blog Admin", template_mode="bootstrap4")
 admin.add_view(TagAdminView(models.Tag, db.session, category="Models"))
 admin.add_view(CustomView(models.Article, db.session, category="Models"))
 admin.add_view(UserAdminView(models.User, db.session, category="Models"))
+admin.add_view(AuthorAdminView(models.Author, db.session, category="Models"))
 
 class MyAdminIndexView(AdminIndexView):
 
